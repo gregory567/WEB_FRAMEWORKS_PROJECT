@@ -1,5 +1,5 @@
 
-<div class="form-container">
+
 <form class="example-form" #loginForm = "ngForm" (ngSubmit)="onSubmit(loginForm)">
     <mat-form-field appearance="fill" class="example-full-width">
       <mat-label>Enter your email</mat-label>
@@ -27,4 +27,14 @@
 
     <button mat-raised-button color="primary" type="submit">Login</button>
 </form>
-</div>
+
+
+<span>hide: {{ hide }}</span><br>
+<span>hideConfirm: {{ hideConfirm }}</span><br>
+<span>email adress field is empty: {{ email.hasError('required') }}</span><br>
+<span>email is not a valid email adress: {{ email.hasError('email') }}</span><br>
+<span>password field is empty: {{ password.hasError('required') }}</span><br>
+<span>password is not 8 characters long: {{ password.hasError('minlength') }}</span><br>
+<span>password is longer than 20 characters: {{ password.hasError('maxlength') }}</span><br>
+<span>password confirmation field is empty: {{ confirmPassword.hasError('required') }}</span><br>
+<span>password and confirmation do not match: {{ confirmPassword.hasError('passwordMismatch') }}</span><br>
