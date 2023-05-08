@@ -1,1 +1,30 @@
-<p>login works!</p>
+
+<div class="form-container">
+<form class="example-form" #loginForm = "ngForm" (ngSubmit)="onSubmit(loginForm)">
+    <mat-form-field appearance="fill" class="example-full-width">
+      <mat-label>Enter your email</mat-label>
+      <input matInput type="email" placeholder="pat@example.com" required name = "email" [formControl]="email">
+      <mat-error *ngIf="email.invalid">{{getEmailErrorMessage()}}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="example-full-width">
+        <mat-label>Enter your password</mat-label>
+        <input matInput [type]="hide ? 'password' : 'text'" name = "password" [formControl]="password">
+        <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+          <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        <mat-error *ngIf="password.invalid">{{getPasswordErrorMessage()}}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="example-full-width">
+      <mat-label>Confirm your password</mat-label>
+      <input matInput [type]="hideConfirm ? 'password' : 'text'" name="confirmPassword" [formControl]="confirmPassword">
+      <button mat-icon-button matSuffix (click)="hideConfirm = !hideConfirm" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hideConfirm">
+        <mat-icon>{{hideConfirm ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+      <mat-error *ngIf="confirmPassword.invalid">{{getConfirmPasswordErrorMessage()}}</mat-error>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit">Login</button>
+</form>
+</div>
