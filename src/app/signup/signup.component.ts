@@ -8,7 +8,7 @@ import {NgForm} from '@angular/forms';
   styleUrls: ['./signup.component.css']
 })
 
-export class LoginComponent {
+export class SignupComponent {
 
   hidePassword = true;
   hideConfirm = true;

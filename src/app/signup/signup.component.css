@@ -30,3 +30,13 @@ button[type="submit"] {
     max-width: 200px;
 }
   
+td {
+    padding-right: 8px;
+}
+
+.align-end {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+  
