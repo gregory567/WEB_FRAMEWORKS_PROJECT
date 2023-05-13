@@ -1,4 +1,11 @@
 
 <h1> {{title}} </h1>
-<app-login></app-login>
+
+<mat-toolbar>
+    <span>My App</span>
+    <a mat-raised-button color="primary" type="button" routerLink="/login">Login</a>
+    <a mat-raised-button color="primary" type="button" routerLink="/signup">Sign Up</a>
+</mat-toolbar>
+
+
 <router-outlet></router-outlet>
