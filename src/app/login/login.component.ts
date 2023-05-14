@@ -10,6 +10,7 @@ import {NgForm} from '@angular/forms';
 
 export class LoginComponent {
 
+  title = 'Login Formular';
   hidePassword: boolean = true;
   hideConfirm: boolean = true;
   loginSuccessful: boolean = false;
