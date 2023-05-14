@@ -10,8 +10,10 @@ import {NgForm} from '@angular/forms';
 
 export class SignupComponent {
 
-  hidePassword = true;
-  hideConfirm = true;
+  hidePassword: boolean = true;
+  hideConfirm: boolean = true;
+  loginSuccessful: boolean = false;
+  loginFailed: boolean = false;
   
   email = new FormControl('', [
     Validators.required, 
@@ -68,12 +70,25 @@ export class SignupComponent {
   constructor() {}
 
   onSubmit(form: NgForm) {
+
+    this.loginSuccessful = false;
+    this.loginFailed = false;
+
     if (form.valid) {
       console.log(form.value);
       console.log(form.valid);
       console.log('Email:', this.email.value);
       console.log('Password:', this.password.value);
       console.log('Confirm Password:', this.confirmPassword.value);
+
+      if (this.email.value === 'test@test.at' && this.password.value === '12345678' && this.confirmPassword.value === '12345678') {
+        this.loginSuccessful = true;
+        this.loginFailed = false;
+      } else {
+        this.loginSuccessful = false;
+        this.loginFailed = true;
+      }
+
     }
   }
 

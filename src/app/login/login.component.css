@@ -29,4 +29,12 @@ button[type="submit"] {
     width: 100%;
     max-width: 200px;
 }
+
+.success-message {
+    color: green;
+}
+  
+.error-message {
+    color: red;
+}
   

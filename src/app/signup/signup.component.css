@@ -39,4 +39,11 @@ td {
     text-align: right;
 }
 
+.success-message {
+    color: green;
+}
+  
+.error-message {
+    color: red;
+}
   

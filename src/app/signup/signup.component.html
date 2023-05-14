@@ -52,6 +52,9 @@
     </p>
 
     <button mat-raised-button color="primary" type="submit">Sign Up</button>
+
+    <p *ngIf="loginSuccessful" class="success-message">Login successful.</p>
+    <p *ngIf="loginFailed" class="error-message">Login failed.</p>
 </form>
 
 

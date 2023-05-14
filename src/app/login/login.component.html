@@ -9,9 +9,9 @@
 
     <mat-form-field appearance="fill" class="example-full-width">
         <mat-label>Enter your password</mat-label>
-        <input matInput [type]="hide ? 'password' : 'text'" name = "password" [formControl]="password">
-        <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
-          <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        <input matInput [type]="hidePassword ? 'password' : 'text'" name = "password" [formControl]="password">
+        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
         </button>
         <mat-error *ngIf="password.invalid">{{getPasswordErrorMessage()}}</mat-error>
     </mat-form-field>
@@ -26,10 +26,13 @@
     </mat-form-field>
 
     <button mat-raised-button color="primary" type="submit">Login</button>
+
+    <p *ngIf="loginSuccessful" class="success-message">Login successful.</p>
+    <p *ngIf="loginFailed" class="error-message">Login failed.</p>
 </form>
 
 
-<span>hide: {{ hide }}</span><br>
+<span>hide: {{ hidePassword }}</span><br>
 <span>hideConfirm: {{ hideConfirm }}</span><br>
 <span>email adress field is empty: {{ email.hasError('required') }}</span><br>
 <span>email is not a valid email adress: {{ email.hasError('email') }}</span><br>
