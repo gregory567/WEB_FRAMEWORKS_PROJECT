@@ -12,8 +12,8 @@ export class SignupComponent {
 
   hidePassword: boolean = true;
   hideConfirm: boolean = true;
-  loginSuccessful: boolean = false;
-  loginFailed: boolean = false;
+  signupSuccessful: boolean = false;
+  signupFailed: boolean = false;
   
   email = new FormControl('', [
     Validators.required, 
@@ -29,6 +29,13 @@ export class SignupComponent {
   confirmPassword = new FormControl('', [
     Validators.required,
     this.matchConfirmPassword.bind(this),
+  ]);
+
+  address = new FormControl('');
+
+  postalCodeFormControl = new FormControl('', [
+    Validators.required,
+    Validators.pattern('[0-9]*'),
   ]);
 
   getEmailErrorMessage() {
@@ -67,12 +74,22 @@ export class SignupComponent {
     return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
+  getPostalCodeErrorMessage() {
+    if (this.postalCodeFormControl.hasError('required')) {
+      return 'Postal code is required';
+    }
+    if (this.postalCodeFormControl.hasError('pattern')) {
+      return 'Postal code must contain only numbers';
+    }
+    return '';
+  }
+
   constructor() {}
 
   onSubmit(form: NgForm) {
 
-    this.loginSuccessful = false;
-    this.loginFailed = false;
+    this.signupSuccessful = false;
+    this.signupFailed = false;
 
     if (form.valid) {
       console.log(form.value);
@@ -82,11 +99,11 @@ export class SignupComponent {
       console.log('Confirm Password:', this.confirmPassword.value);
 
       if (this.email.value === 'test@test.at' && this.password.value === '12345678' && this.confirmPassword.value === '12345678') {
-        this.loginSuccessful = true;
-        this.loginFailed = false;
+        this.signupSuccessful = true;
+        this.signupFailed = false;
       } else {
-        this.loginSuccessful = false;
-        this.loginFailed = true;
+        this.signupSuccessful = false;
+        this.signupFailed = true;
       }
 
     }

@@ -29,10 +29,10 @@
       <mat-label>Company</mat-label>
       <input matInput disabled value="FH Technikum Wien">
     </mat-form-field>
-  
+
     <mat-form-field class="example-full-width">
       <mat-label>Address</mat-label>
-      <textarea matInput placeholder="Ex. 100 Main St">Höchstädtplatz 6 1200 Wien</textarea>
+      <textarea matInput placeholder="Höchstädtplatz 6 1200 Wien" name="address" [formControl]="address"></textarea>
     </mat-form-field>
   
     <p>
@@ -42,19 +42,20 @@
       </mat-form-field>
       <mat-form-field class="example-full-width">
         <mat-label>Street</mat-label>
-        <input matInput placeholder="Höchstädtplatz">
+        <input matInput placeholder="Höchstädtplatz 6">
       </mat-form-field>
       <mat-form-field class="example-full-width">
         <mat-label>Postal Code</mat-label>
-        <input matInput #postalCode maxlength="5" placeholder="1200" value="1010">
+        <input matInput #postalCode type="text" pattern="[0-9]*" maxlength="5" placeholder="1200" value="1010" [formControl]="postalCodeFormControl">
         <mat-hint class="align-end">{{postalCode.value.length}} / 5</mat-hint>
+        <mat-error *ngIf="postalCodeFormControl.invalid">{{getPostalCodeErrorMessage()}}</mat-error>
       </mat-form-field>
     </p>
 
     <button mat-raised-button color="primary" type="submit">Sign Up</button>
 
-    <p *ngIf="loginSuccessful" class="success-message">Login successful.</p>
-    <p *ngIf="loginFailed" class="error-message">Login failed.</p>
+    <p *ngIf="signupSuccessful" class="success-message">Signup successful.</p>
+    <p *ngIf="signupFailed" class="error-message">Signup failed.</p>
 </form>
 
 
