@@ -1,0 +1,465 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "FHTW Puzzle Game",
+      "summary": "A puzzle game to spend your free time with.",
+      "description": "This is a Puzzle Game Server based on OpenAPI Specification v3.1.0.",
+      "license": {
+        "name": "Apache 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+      },
+      "version": "1.0.11"
+    },
+    "servers": [
+        {
+          "url": "https://development.puzzlegame-server.com/v1",
+          "description": "Development server"
+        },
+        {
+          "url": "https://staging.puzzlegame-server.com/v1",
+          "description": "Staging server"
+        },
+        {
+          "url": "https://api.puzzlegame-server.com/v1",
+          "description": "Production server"
+        }
+    ],
+    "tags": [
+      {
+        "name": "user",
+        "description": "Operations about user"
+      }
+    ],
+    "paths": {
+      "/user": {
+        "post": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Create user",
+          "description": "Create user",
+          "operationId": "createUser",
+          "requestBody": {
+            "description": "Created user object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              },
+              "application/x-www-form-urlencoded": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                },
+                "application/xml": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              }
+            },
+            "405": {
+              "description": "Invalid input"
+            }
+          }
+        }
+      },
+      "/user/login": {
+        "get": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Logs user into the system",
+          "description": "",
+          "operationId": "loginUser",
+          "parameters": [
+            {
+              "name": "email",
+              "in": "query",
+              "description": "The user email for login",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "password",
+              "in": "query",
+              "description": "The password for login in clear text",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "password_confirm",
+              "in": "query",
+              "description": "The password confirmation for login in clear text",
+              "required": false,
+              "schema": {
+                "type": "string"
+               }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "headers": {
+                "X-Rate-Limit-Limit": {
+                  "description": "The number of allowed requests in the current period",
+                  "schema": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                },
+                "X-Rate-Limit-Remaining": {
+                  "description": "The number of remaining requests in the current period",
+                  "schema": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                },
+                "X-Rate-Limit-Reset": {
+                  "description": "The number of seconds left in the current period",
+                  "schema": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                },
+                "X-Expires-After": {
+                    "description": "date in UTC when token expires",
+                    "schema": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "token": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid email supplied"
+            },
+            "401": {
+              "description": "Unauthorized"
+            }
+          }
+        }
+      },
+      "/user/logout": {
+        "get": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Logs out current logged in user session",
+          "description": "",
+          "operationId": "logoutUser",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "405": {
+              "description": "Method Not Allowed"
+            }
+          }
+        }
+      },
+      "/user/{email}": {
+        "get": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Get user by user email",
+          "description": "",
+          "operationId": "getUserByEmail",
+          "parameters": [
+            {
+              "name": "email",
+              "in": "path",
+              "description": "The email that needs to be fetched. Use user1@gmail.com for testing. ",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                },
+                "application/xml": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid email supplied"
+            },
+            "404": {
+              "description": "User not found"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Updates an existing user with form data",
+          "description": "This can only be done by the logged in user.",
+          "operationId": "updateUserWithForm",
+          "parameters": [
+            {
+              "name": "email",
+              "in": "path",
+              "description": "The email that needs to be updated",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "Update an existing user in the store",
+            "content": {
+                "application/x-www-form-urlencoded": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "description": "Updated email of existing user",
+                          "type": "string"
+                        }
+                      } 
+                    }
+                }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "User updated.",
+              "content": {
+                "application/json": {},
+                "application/xml": {}
+              }
+            },
+            "405": {
+              "description": "Method Not Allowed",
+              "content": {
+                "application/json": {},
+                "application/xml": {}
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Delete user",
+          "description": "This can only be done by the logged in user.",
+          "operationId": "deleteUser",
+          "parameters": [
+            {
+              "name": "username",
+              "in": "path",
+              "description": "The name that needs to be deleted",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+                "description": "successful operation",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  },
+                  "application/xml": {
+                    "schema": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+            },
+            "400": {
+              "description": "Invalid username supplied"
+            },
+            "404": {
+              "description": "User not found"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Address": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string",
+              "example": "Palo Alto"
+            },
+            "street": {
+                "type": "string",
+                "example": "437 Lytton"
+            },
+            "postal_code": {
+              "type": "string",
+              "example": "94301"
+            }
+          },
+          "xml": {
+            "name": "address"
+          }
+        },
+        "User": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64",
+              "example": 10
+            },
+            "email": {
+              "type": "string",
+              "example": "john@email.com"
+            },
+            "password": {
+              "type": "string",
+              "example": "12345"
+            },
+            "password_confirm": {
+                "type": "string",
+                "example": "12345"
+            },
+            "userStatus": {
+              "type": "integer",
+              "description": "User Status",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          "xml": {
+            "name": "user"
+          }
+        },
+        "ApiResponse": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "type": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "xml": {
+            "name": "##default"
+          }
+        }
+      },
+      "parameters": {
+        "skipParam": {
+          "name": "skip",
+          "in": "query",
+          "description": "number of items to skip",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "limitParam": {
+          "name": "limit",
+          "in": "query",
+          "description": "max records to return",
+          "required": true,
+          "schema" : {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "requestBodies": {
+        "UserArray": {
+          "description": "List of user object",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
+      "securitySchemes": {
+        "puzzlegame_auth": {
+          "type": "oauth2",
+          "flows": {
+            "implicit": {
+              "authorizationUrl": "https://example.org/api/oauth/dialog",
+              "scopes": {
+                "write:users": "modify users in your account",
+                "read:users": "read your users"
+              }
+            }
+          }
+        },
+        "api_key": {
+          "type": "apiKey",
+          "name": "api_key",
+          "in": "header"
+        }
+      }
+    }
+  }
+
+
