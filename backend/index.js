@@ -19,8 +19,9 @@ let tokens = [
 ];
 
 
+// To parse the incoming requests with JSON payloads
 app.use(express.urlencoded({extended: true}));
-app.use(express.json()) // To parse the incoming requests with JSON payloads
+app.use(express.json()) 
 
 app.use("*", function(req, res, next){
     console.log(new Date(), "Request on:" + req.originalUrl);
@@ -28,7 +29,7 @@ app.use("*", function(req, res, next){
 });
 
 app.get("/", function(req, res){
-    res.status(200).json("Fuck you!");
+    res.status(200).json("Backend works!");
 });
 
 app.get("/users", function(req, res){
