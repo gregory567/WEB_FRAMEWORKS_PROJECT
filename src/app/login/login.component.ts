@@ -1,6 +1,7 @@
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component } from '@angular/core';
-import {FormControl, Validators} from '@angular/forms';
-import {NgForm} from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -9,6 +10,12 @@ import {NgForm} from '@angular/forms';
 })
 
 export class LoginComponent {
+
+  constructor(private http: HttpClient) {}
+
+  httpOptions = {
+    headers: new HttpHeaders({ "Content-Type": "application/json"})
+  };
 
   title = 'Login Formular';
   hidePassword: boolean = true;
@@ -68,7 +75,6 @@ export class LoginComponent {
     return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
-  constructor() {}
 
   onSubmit(form: NgForm) {
 
