@@ -40,23 +40,8 @@ export class LandingPageComponent {
   }
 
   requestHighscoreList() {
-    const headers = new HttpHeaders({
-      'Authorization': 'Bearer ' + localStorage.getItem('authToken') // Retrieve token from local storage
-    });
-
-    this.http.get('http://localhost:3000/highscores', { headers: headers })
-    .subscribe({
-      next: (highscores) => {
-        // Handle success response
-        console.log('Highscore list:', highscores);
-        // Redirect to highscores page and pass the highscore list as a parameter
-        this.router.navigate(['/highscores'], { state: { data: { highscores: highscores } } });
-      },
-      error: (err) => {
-        // Handle error response
-        console.error('Error retrieving highscores:', err);
-      }
-    });
+    // Redirect to highscores page 
+    this.router.navigate(['/highscores']);
   }
 
   logout() {
