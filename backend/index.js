@@ -161,6 +161,20 @@ app.post("/logout", function (req, res) {
 });
 
 
+app.delete("/tokens", authenticate, function(req, res) {
+    const token = req.headers.authorization ?? "";
+    const authUserIndex = tokens.findIndex((t) => "Bearer " + t.token === token);
+  
+    if (authUserIndex !== -1) {
+      // Remove the authentication token from the tokens array
+      tokens.splice(authUserIndex, 1);
+      res.status(200).json({ message: "Logged out successfully.", code: 200 });
+    } else {
+      res.status(404).json({ message: "Token not found.", code: 404 });
+    }
+});
+
+
 app.post("/signup", function (req, res, next) {
 
     const signupData = JSON.stringify(req.body);
