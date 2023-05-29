@@ -122,14 +122,12 @@ export class SignupComponent {
       };
   
       this.http
-      .post<{ message: string, authToken: string }>('http://localhost:3000/signup', signupData, this.httpOptions)
+      .post<{ message: string }>('http://localhost:3000/signup', signupData, this.httpOptions)
       .subscribe({
         next: (responseData) => {
           this.signupSuccessful = true;
           this.signupErrorMessage = '';
           console.log(responseData.message);
-          // Save the auth token in local storage or a secure location
-          localStorage.setItem('authToken', responseData.authToken);
         },
         error: (err) => {
           this.signupSuccessful = false;

@@ -110,7 +110,7 @@ app.get("/users", authenticate, function (req, res) {
 });
 
 
-app.post("/users", function (req, res) {
+app.post("/users", function(req, res) {
     console.log("Post: ", req.body);
     const { username, password } = req.body;
   
@@ -132,7 +132,7 @@ app.post("/users", function (req, res) {
 });
 
 
-app.post("/login", async function (req, res) {
+app.post("/login", async function(req, res) {
 
     const loginData = JSON.stringify(req.body);
     console.log(loginData);
@@ -150,14 +150,14 @@ app.post("/login", async function (req, res) {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: "Invalid username or password.", code: 401 });
     }
+
+    // Generate a random auth token of length 32
+    const authToken = generateAuthToken(32);
+
+    // Add the token to the tokens array
+    tokens.push({ token: authToken, user: username });
   
-    res.status(200).json({ message: "Login successful.", code: 200 });
-});
-
-
-app.post("/logout", function (req, res) {
-    // perform other logout logic...
-    res.status(200).json({ message: "Logged out successfully.", code: 200 });
+    res.status(200).json({ message: "Login successful.", code: 200, authToken });
 });
 
 
@@ -174,6 +174,22 @@ app.delete("/tokens", authenticate, function(req, res) {
     }
 });
 
+app.post("/logout", authenticate, function(req, res) {
+    const token = req.headers.authorization ?? "";
+    const authUserIndex = tokens.findIndex((t) => "Bearer " + t.token === token);
+  
+    if (authUserIndex !== -1) {
+      // Remove the authentication token from the tokens array
+      tokens.splice(authUserIndex, 1);
+      
+      console.log("Token destroyed:", token);
+      
+      res.status(200).json({ message: "Logged out successfully.", code: 200 });
+    } else {
+      res.status(404).json({ message: "Token not found.", code: 404 });
+    }
+});
+  
 
 app.post("/signup", function (req, res, next) {
 
@@ -191,9 +207,6 @@ app.post("/signup", function (req, res, next) {
       return res.status(409).json({ message: "Username already exists.", code: 409 });
     }
   
-    // Generate a random auth token of length 32
-    const authToken = generateAuthToken(32);
-  
     // Hash the password
     bcrypt.hash(password, 10, function (err, hashedPassword) {
       if (err) {
@@ -203,15 +216,12 @@ app.post("/signup", function (req, res, next) {
       // Add the new user to the users array with the hashed password
       users.push({ username, password: hashedPassword });
   
-      // Add the token to the tokens array
-      tokens.push({ token: authToken, user: username });
-  
-      res.status(200).json({ message: "User registered successfully.", code: 200, authToken });
+      res.status(200).json({ message: "User registered successfully.", code: 200 });
     });
 });
 
 
-app.post("/highscores", function(req, res) {
+app.post("/highscores", authenticate, function(req, res) {
     const highscoreData = JSON.stringify(req.body);
     console.log(highscoreData);
 

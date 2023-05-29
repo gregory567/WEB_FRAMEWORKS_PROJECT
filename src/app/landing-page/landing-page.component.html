@@ -1,1 +1,23 @@
-<p>landing-page works!</p>
+
+<mat-toolbar color="primary">
+    <span>Landing Page</span>
+    <span class="spacer"></span>
+    <button mat-button (click)="postHighscore()">Post New Highscore Points</button>
+    <button mat-button (click)="requestHighscoreList()">Show Highscore List</button>
+    <button mat-button (click)="logout()">Logout</button>
+</mat-toolbar>
+  
+<div class="landing-content">
+    <h1>Welcome to the Landing Page!</h1>
+
+    <div class="input-container">
+        <mat-form-field>
+            <input matInput placeholder="Username" [(ngModel)]="username">
+        </mat-form-field>
+        
+        <mat-form-field>
+            <input matInput placeholder="New Highscore" [(ngModel)]="newHighscore">
+        </mat-form-field>
+    </div>
+</div>
+  

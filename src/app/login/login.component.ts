@@ -85,13 +85,16 @@ export class LoginComponent {
       };
 
       this.http
-      .post<{ message: string }>("http://localhost:3000/login", loginData, this.httpOptions)
+      .post<{ message: string, authToken: string }>("http://localhost:3000/login", loginData, this.httpOptions)
       .subscribe({
         next: (responseData) => {
           this.loginSuccessful = true;
           this.loginFailed = false;
           this.loginErrorMessage = '';
           console.log(responseData.message);
+
+          // Save the auth token in local storage or a secure location
+          localStorage.setItem('authToken', responseData.authToken);
 
           // Redirect to landing page upon successful login
           this.router.navigate(['/landing-page']);
