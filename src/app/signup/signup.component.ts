@@ -8,20 +8,19 @@ import { NgForm } from '@angular/forms';
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css']
 })
-
 export class SignupComponent {
-
   constructor(private http: HttpClient) {}
 
   httpOptions = {
     headers: new HttpHeaders({ "Content-Type": "application/json"})
   };
 
-  title = 'Signup Formular';
-  hidePassword: boolean = true;
-  hideConfirm: boolean = true;
-  signupSuccessful: boolean = false;
-  signupFailed: boolean = false;
+  title = 'Signup Form';
+  hidePassword = true;
+  hideConfirm = true;
+  signupSuccessful = false;
+  signupFailed = false;
+  signupErrorMessage: string = '';
   
   email = new FormControl('', [
     Validators.required, 
@@ -41,6 +40,14 @@ export class SignupComponent {
 
   address = new FormControl('');
 
+  city = new FormControl('', [
+    Validators.required
+  ]);
+
+  street = new FormControl('', [
+    Validators.required
+  ]);
+
   postalCodeFormControl = new FormControl('', [
     Validators.required,
     Validators.pattern('[0-9]*'),
@@ -48,7 +55,7 @@ export class SignupComponent {
 
   getEmailErrorMessage() {
     if (this.email.hasError('required')) {
-      return 'You must enter a value';
+      return 'You must enter an email';
     }
     return this.email.hasError('email') ? 'Not a valid email' : '';
   }
@@ -61,7 +68,7 @@ export class SignupComponent {
       return 'Password must be at least 8 characters';
     }
     if (this.password.hasError('maxlength')) {
-      return 'Password cannot be more than 20 characters';
+      return 'Password cannot exceed 20 characters';
     }
     return '';
   }
@@ -79,7 +86,20 @@ export class SignupComponent {
   matchConfirmPassword(control: FormControl) {
     const password = this.password.value;
     const confirmPassword = control.value;
+
+    if (!password || !confirmPassword) {
+      return null;
+    }
+    
     return password === confirmPassword ? null : { passwordMismatch: true };
+  }
+
+  getCityErrorMessage() {
+    return this.city.hasError('required') ? 'City is required' : '';
+  }
+
+  getStreetErrorMessage() {
+    return this.street.hasError('required') ? 'Street is required' : '';
   }
 
   getPostalCodeErrorMessage() {
@@ -93,51 +113,31 @@ export class SignupComponent {
   }
 
   onSubmit(form: NgForm) {
-
-    // read more about this functionality at http://angular.io/guide/observables
-    /*
-    this.http.post<{message: string}>("http://localhost:3000/signup", form.value, this.httpOptions)
+    if (form.valid) {
+      this.signupFailed = false;
+  
+      const signupData = {
+        username: form.value.email,
+        password: form.value.password,
+      };
+  
+      this.http
+      .post<{ message: string, authToken: string }>('http://localhost:3000/signup', signupData, this.httpOptions)
       .subscribe({
         next: (responseData) => {
+          this.signupSuccessful = true;
+          this.signupErrorMessage = '';
           console.log(responseData.message);
+          // Save the auth token in local storage or a secure location
+          localStorage.setItem('authToken', responseData.authToken);
         },
         error: (err) => {
+          this.signupSuccessful = false;
+          this.signupFailed = true;
+          this.signupErrorMessage = err.error.message;
           console.log(err);
         }
       });
-    */
-
-    this.signupSuccessful = false;
-    this.signupFailed = false;
-
-    if (form.valid) {
-      console.log(form.valid);
-      console.log('Email:', this.email.value);
-      console.log('Password:', this.password.value);
-      console.log('Confirm Password:', this.confirmPassword.value);
-
-      if (this.email.value === 'test@test.at' && this.password.value === '12345678' && this.confirmPassword.value === '12345678') {
-        this.signupSuccessful = true;
-        this.signupFailed = false;
-
-        this.http
-          .post<{ message: string }>('http://localhost:3000/signup', form.value, this.httpOptions)
-          .subscribe({
-            next: (responseData) => {
-              console.log(responseData.message);
-            },
-            error: (err) => {
-              console.log(err);
-            }
-          });
-
-      } else {
-        this.signupSuccessful = false;
-        this.signupFailed = true;
-      }
-
     }
-  }
-
-
+  } 
 }

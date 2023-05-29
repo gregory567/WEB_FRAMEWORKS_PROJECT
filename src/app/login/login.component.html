@@ -29,6 +29,8 @@
     <button mat-raised-button color="primary" type="submit">Login</button>
 
     <p *ngIf="loginSuccessful" class="success-message">Login successful.</p>
+    <!-- Display login error message -->
+    <p *ngIf="loginFailed" class="login-error">{{ loginErrorMessage }}</p>
     <p *ngIf="loginFailed" class="error-message">Login failed.</p>
 </form>
 

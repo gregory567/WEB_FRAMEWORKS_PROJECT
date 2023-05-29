@@ -10,18 +10,18 @@ import { NgForm } from '@angular/forms';
 })
 
 export class LoginComponent {
-
   constructor(private http: HttpClient) {}
 
   httpOptions = {
     headers: new HttpHeaders({ "Content-Type": "application/json"})
   };
 
-  title = 'Login Formular';
+  title = 'Login Form';
   hidePassword: boolean = true;
   hideConfirm: boolean = true;
   loginSuccessful: boolean = false;
   loginFailed: boolean = false;
+  loginErrorMessage: string = '';
   
   email = new FormControl('', [
     Validators.required, 
@@ -54,7 +54,7 @@ export class LoginComponent {
       return 'Password must be at least 8 characters';
     }
     if (this.password.hasError('maxlength')) {
-      return 'Password cannot be more than 20 characters';
+      return 'Password cannot exceed 20 characters';
     }
     return '';
   }
@@ -75,40 +75,30 @@ export class LoginComponent {
     return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
-
   onSubmit(form: NgForm) {
 
-    this.http.post<{message: string}>("http://localhost:3000/login", form.value, this.httpOptions)
-      // read more about this functionality at http://angular.io/guide/observables
+    if (form.valid) {
+      const loginData = {
+        username: form.value.email,
+        password: form.value.password
+      };
+
+      this.http
+      .post<{ message: string }>("http://localhost:3000/login", loginData, this.httpOptions)
       .subscribe({
         next: (responseData) => {
+          this.loginSuccessful = true;
+          this.loginFailed = false;
+          this.loginErrorMessage = '';
           console.log(responseData.message);
         },
         error: (err) => {
+          this.loginSuccessful = false;
+          this.loginFailed = true;
+          this.loginErrorMessage = err.error.message;
           console.log(err);
         }
       });
-
-
-    this.loginSuccessful = false;
-    this.loginFailed = false;
-
-    if (form.valid) {
-      console.log(form.valid);
-      console.log('Email:', this.email.value);
-      console.log('Password:', this.password.value);
-      console.log('Confirm Password:', this.confirmPassword.value);
-
-      if (this.email.value === 'test@test.at' && this.password.value === '12345678' && this.confirmPassword.value === '12345678') {
-        this.loginSuccessful = true;
-        this.loginFailed = false;
-      } else {
-        this.loginSuccessful = false;
-        this.loginFailed = true;
-      }
-
     }
   }
-
-
 }

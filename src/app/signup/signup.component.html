@@ -35,27 +35,32 @@
       <mat-label>Address</mat-label>
       <textarea matInput placeholder="Höchstädtplatz 6 1200 Wien" name="address" [formControl]="address"></textarea>
     </mat-form-field>
-  
+
     <p>
       <mat-form-field class="example-full-width">
         <mat-label>City</mat-label>
-        <input matInput placeholder="Wien">
+        <input matInput placeholder="Wien" name="city" [formControl]="city">
+        <mat-error *ngIf="city.invalid">{{ getCityErrorMessage() }}</mat-error>
       </mat-form-field>
       <mat-form-field class="example-full-width">
         <mat-label>Street</mat-label>
-        <input matInput placeholder="Höchstädtplatz 6">
+        <input matInput placeholder="Höchstädtplatz 6" name="street" [formControl]="street">
+        <mat-error *ngIf="street.invalid">{{ getStreetErrorMessage() }}</mat-error>
       </mat-form-field>
       <mat-form-field class="example-full-width">
         <mat-label>Postal Code</mat-label>
-        <input matInput #postalCode type="text" pattern="[0-9]*" maxlength="5" placeholder="1200" value="1010" [formControl]="postalCodeFormControl">
-        <mat-hint class="align-end">{{postalCode.value.length}} / 5</mat-hint>
-        <mat-error *ngIf="postalCodeFormControl.invalid">{{getPostalCodeErrorMessage()}}</mat-error>
+        <input matInput #postalCode type="text" pattern="[0-9]*" maxlength="5" placeholder="1200" value="1010"
+          name="postalCode" [formControl]="postalCodeFormControl">
+        <mat-hint class="align-end">{{ postalCode.value.length }} / 5</mat-hint>
+        <mat-error *ngIf="postalCodeFormControl.invalid">{{ getPostalCodeErrorMessage() }}</mat-error>
       </mat-form-field>
     </p>
 
     <button mat-raised-button color="primary" type="submit">Sign Up</button>
 
     <p *ngIf="signupSuccessful" class="success-message">Signup successful.</p>
+    <!-- Display signup error message -->
+    <p *ngIf="signupFailed" class="signup-error">{{ signupErrorMessage }}</p>
     <p *ngIf="signupFailed" class="error-message">Signup failed.</p>
 </form>
 
