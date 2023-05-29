@@ -1,6 +1,7 @@
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component } from '@angular/core';
-import {FormControl, Validators} from '@angular/forms';
-import {NgForm} from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-signup',
@@ -9,6 +10,12 @@ import {NgForm} from '@angular/forms';
 })
 
 export class SignupComponent {
+
+  constructor(private http: HttpClient) {}
+
+  httpOptions = {
+    headers: new HttpHeaders({ "Content-Type": "application/json"})
+  };
 
   title = 'Signup Formular';
   hidePassword: boolean = true;
@@ -85,15 +92,23 @@ export class SignupComponent {
     return '';
   }
 
-  constructor() {}
-
   onSubmit(form: NgForm) {
+
+    this.http.post<{message: string}>("http://localhost:3000/signup", form.value, this.httpOptions)
+      // read more about this functionality at http://angular.io/guide/observables
+      .subscribe({
+        next: (responseData) => {
+          console.log(responseData.message);
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
 
     this.signupSuccessful = false;
     this.signupFailed = false;
 
     if (form.valid) {
-      console.log(form.value);
       console.log(form.valid);
       console.log('Email:', this.email.value);
       console.log('Password:', this.password.value);

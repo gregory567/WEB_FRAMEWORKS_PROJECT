@@ -78,11 +78,22 @@ export class LoginComponent {
 
   onSubmit(form: NgForm) {
 
+    this.http.post<{message: string}>("http://localhost:3000/login", form.value, this.httpOptions)
+      // read more about this functionality at http://angular.io/guide/observables
+      .subscribe({
+        next: (responseData) => {
+          console.log(responseData.message);
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
+
+
     this.loginSuccessful = false;
     this.loginFailed = false;
 
     if (form.valid) {
-      console.log(form.value);
       console.log(form.valid);
       console.log('Email:', this.email.value);
       console.log('Password:', this.password.value);

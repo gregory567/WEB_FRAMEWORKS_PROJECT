@@ -97,7 +97,19 @@ app.post("/login", function(req, res, next) {
 
 });
 
-app.post("/logout", function(req, res) {
+app.post("/logout", function(req, res, next) {
+});
+
+
+app.post("/signup", function(req, res, next) {
+    const signupData = JSON.stringify(req.body);
+    console.log(signupData);
+
+    // signup logic, e.g. check against the in memory DB.....
+
+    res.status(200).json({
+        message: "Hello signup from express.js"
+    });
 });
 
 
