@@ -81,7 +81,7 @@ function authenticate(req, res, next) {
       req.user = authUser.user;
       next();
     } else {
-      res.status(401).json({ message: "Not allowed.", code: 401 });
+      res.status(401).json({ message: "401 Unauthorized", code: 401 });
     }
 }
 
