@@ -94,8 +94,9 @@ export class SignupComponent {
 
   onSubmit(form: NgForm) {
 
+    // read more about this functionality at http://angular.io/guide/observables
+    /*
     this.http.post<{message: string}>("http://localhost:3000/signup", form.value, this.httpOptions)
-      // read more about this functionality at http://angular.io/guide/observables
       .subscribe({
         next: (responseData) => {
           console.log(responseData.message);
@@ -104,6 +105,7 @@ export class SignupComponent {
           console.log(err);
         }
       });
+    */
 
     this.signupSuccessful = false;
     this.signupFailed = false;
@@ -117,6 +119,18 @@ export class SignupComponent {
       if (this.email.value === 'test@test.at' && this.password.value === '12345678' && this.confirmPassword.value === '12345678') {
         this.signupSuccessful = true;
         this.signupFailed = false;
+
+        this.http
+          .post<{ message: string }>('http://localhost:3000/signup', form.value, this.httpOptions)
+          .subscribe({
+            next: (responseData) => {
+              console.log(responseData.message);
+            },
+            error: (err) => {
+              console.log(err);
+            }
+          });
+
       } else {
         this.signupSuccessful = false;
         this.signupFailed = true;

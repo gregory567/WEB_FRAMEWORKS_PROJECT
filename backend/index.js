@@ -1,29 +1,56 @@
+
+// import the express library
 const express = require("express");
 const app = express();
+// import the cors library 
 const cors = require("cors");
+// auth token generation
+const { generateAuthToken } = require("./helpers");
+// library for password hashing
+const bcrypt = require("bcrypt");
+// save the port that the server operates on
 const port = 3000;
 
 // we use the following middlewares in order to be able to use json and urlencoded data
+// To parse the incoming requests with JSON payloads
+// https://stackoverflow.com/questions/66525078/bodyparser-is-deprecated
+app.use(express.urlencoded({extended: true}));
 app.use(express.json());
-app.use(express.urlencoded({
-    extended: false
-}));
 
-
-let users = [ { id: 1, name: "John", birth: "01.01.1990" },
-            { id: 2, name: "Mary", birth: "17.05.1993" },
-            { id: 3, name: "Mike", birth: "12.12.2002" }];
 
 // inmemory-DB
-// todo: array with username / password
-// todo: array with auth-tokens
-// todo: array with highscores
-let tokens = [ { token: "123456789", user: "admin" } ];
+// users array with username / password
+let users = [
+    { username: "patrick102@gmail.com", password: "12345678" },
+    { username: "jennifer99@gmail.com", password: "abcdefgh" },
+    { username: "michael34@gmail.com", password: "qwertyui" },
+    { username: "emily85@gmail.com", password: "p@ssw0rd" },
+    { username: "david76@gmail.com", password: "98765432" }
+];
 
-// allow request from Angular app (and others)
+// tokens array with auth-tokens
+let tokens = [
+    { token: "admintoken", user: "admin" },
+    { token: "token1", user: "patrick102@gmail.com" },
+    { token: "token2", user: "jennifer99@gmail.com" },
+    { token: "token3", user: "michael34@gmail.com" },
+    { token: "token4", user: "emily85@gmail.com" },
+    { token: "token5", user: "david76@gmail.com" }
+];
+
+// array with highscores
+let highScores = [
+    { user: "patrick102@gmail.com", score: 150 },
+    { user: "jennifer99@gmail.com", score: 200 },
+    { user: "michael34@gmail.com", score: 100 },
+    { user: "emily85@gmail.com", score: 300 },
+    { user: "david76@gmail.com", score: 250 }
+];
+
+// allow request from Angular app (and others) to the resources of the backend server
 app.use(cors());
 
-// classic cors way ...
+// classic cors way, which allows to finetune the specifications...
 // app.use((req, res, next) => {
 //     res.setHeader("Access-Control-Allow-Origin", "*");      // or more strict: "http://localhost:4200"
 //     res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -33,11 +60,7 @@ app.use(cors());
 // });
 
 
-// To parse the incoming requests with JSON payloads
-// https://stackoverflow.com/questions/66525078/bodyparser-is-deprecated
-app.use(express.urlencoded({extended: true}));
-app.use(express.json());
-
+// test the middleware functionality 
 app.use("*", function(req, res, next){
     console.log(new Date(), "Request on:" + req.originalUrl);
     next();
@@ -49,72 +72,165 @@ app.use("*", function(req, res){
 });
 */
 
+// Authentication middleware
+function authenticate(req, res, next) {
+    const token = req.headers.authorization ?? "";
+    const authUser = tokens.find((t) => "Bearer " + t.token === token);
+  
+    if (authUser) {
+      req.user = authUser.user;
+      next();
+    } else {
+      res.status(401).json({ message: "Not allowed.", code: 401 });
+    }
+}
+
+// request to the homepage
 app.get("/", function(req, res){
     res.status(200).json("Backend works!");
 });
 
+// request users array (not secure way of communication)
 app.get("/users", function(req, res){
     res.status(200).json(users);
 });
 
-// return users array only with valid auth token
-app.get("/users/secure", function(req, res) {
-    let token = req.headers.authorization ?? "";
-    let authUser = tokens.find(t => { return ("Bearer " +  t.token) == token} );
-
-    if (authUser !== undefined) {
-        res.status(200).json(users); 
-    } else {
-        res.status(401).json("not allowed"); 
+// Return users array only with valid auth token
+app.get("/users", authenticate, function (req, res) {
+    try {
+        if (users.length === 0) {
+          return res.status(404).json({ message: "No users found.", code: 404 });
+        }
+    
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error retrieving users:", error);
+        res.status(500).json({ message: "Internal server error.", code: 500 });
     }
 });
 
 
-app.post("/users", function(req, res){
+app.post("/users", function (req, res) {
     console.log("Post: ", req.body);
-
-    // users.push({ id: users.length,
-    //             ...req.body });  
-    users.push({
-        id: users.length + 1, 
-        name: req.body.name, 
-        birthDate: req.body.birthDate
-    });
-
-    res.status(201).json("ok");
+    const { username, password } = req.body;
+  
+    // Check if the username or password is missing
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required.", code: 400 });
+    }
+  
+    // Check if the username is already taken
+    const existingUser = users.find((user) => user.username === username);
+    if (existingUser) {
+      return res.status(409).json({ message: "Username already exists.", code: 409 });
+    }
+  
+    // Add the new user to the users array
+    users.push({ username, password });
+  
+    res.status(201).json({ message: "User created successfully.", code: 201 });
 });
 
 
-app.post("/login", function(req, res, next) {
+app.post("/login", async function (req, res) {
+
     const loginData = JSON.stringify(req.body);
     console.log(loginData);
-
-    // login logic, e.g. check against the in memory DB.....
-
-    res.status(200).json({
-        message: "Hello login from express.js"
-    });
-
+    const { username, password } = req.body;
+  
+    // Check if the username or password is missing
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required.", code: 400 });
+    }
+  
+    // Find the user with the given username
+    const user = users.find((user) => user.username === username);
+  
+    // Check if the user exists and the password matches
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: "Invalid username or password.", code: 401 });
+    }
+  
+    res.status(200).json({ message: "Login successful.", code: 200 });
 });
 
-app.post("/logout", function(req, res, next) {
+
+app.post("/logout", function (req, res) {
+    // perform other logout logic...
+    res.status(200).json({ message: "Logged out successfully.", code: 200 });
 });
 
 
-app.post("/signup", function(req, res, next) {
+app.post("/signup", function (req, res, next) {
+
     const signupData = JSON.stringify(req.body);
     console.log(signupData);
 
-    // signup logic, e.g. check against the in memory DB.....
-
-    res.status(200).json({
-        message: "Hello signup from express.js"
+    const { username, password } = req.body;
+  
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required.", code: 400 });
+    }
+  
+    const existingUser = users.find((user) => user.username === username);
+    if (existingUser) {
+      return res.status(409).json({ message: "Username already exists.", code: 409 });
+    }
+  
+    // Generate a random auth token of length 32
+    const authToken = generateAuthToken(32);
+  
+    // Hash the password
+    bcrypt.hash(password, 10, function (err, hashedPassword) {
+      if (err) {
+        return res.status(500).json({ message: "Error hashing password.", code: 500 });
+      }
+  
+      // Add the new user to the users array with the hashed password
+      users.push({ username, password: hashedPassword });
+  
+      // Add the token to the tokens array
+      tokens.push({ token: authToken, user: username });
+  
+      res.status(200).json({ message: "User registered successfully.", code: 200, authToken });
     });
 });
 
 
-app.listen(3000, () => {
-    console.log("Backend server started!");
+app.post("/highscores", function(req, res) {
+    const highscoreData = JSON.stringify(req.body);
+    console.log(highscoreData);
+
+    const { username, score } = req.body;
+  
+    // Check if the username or score is missing
+    if (!username || !score) {
+      return res.status(400).json({ message: "Username and score are required.", code: 400 });
+    }
+  
+    // Add the new highscore to the highScores array
+    highScores.push({ user: username, score: score });
+  
+    res.status(200).json({ message: "Highscore submitted successfully.", code: 200 });
+});
+
+
+app.get("/highscores", authenticate, function (req, res) {
+    try {
+      if (highScores.length === 0) {
+        return res.status(404).json({ message: "No highscores found.", code: 404 });
+      }
+  
+      res.status(200).json(highScores);
+    } catch (error) {
+      console.error("Error retrieving highscores:", error);
+      res.status(500).json({ message: "Internal server error.", code: 500 });
+    }
+});
+
+  
+app.listen(port, () => {
+    console.log("Backend server started on port:", port);
 });
 
 module.exports = app;
