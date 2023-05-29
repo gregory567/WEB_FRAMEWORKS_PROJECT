@@ -1,23 +1,30 @@
 
-<mat-toolbar color="primary">
-    <span>Landing Page</span>
-    <span class="spacer"></span>
-    <button mat-button (click)="postHighscore()">Post New Highscore Points</button>
-    <button mat-button (click)="requestHighscoreList()">Show Highscore List</button>
-    <button mat-button (click)="logout()">Logout</button>
+<mat-toolbar color="primary" class="toolbar">
+  <span class="toolbar-title">Landing Page</span>
+  <span class="spacer"></span>
+  <button mat-button class="toolbar-button" (click)="requestHighscoreList()">Show Highscore List</button>
+  <button mat-button class="toolbar-button" (click)="logout()">Logout</button>
 </mat-toolbar>
-  
-<div class="landing-content">
-    <h1>Welcome to the Landing Page!</h1>
 
-    <div class="input-container">
-        <mat-form-field>
-            <input matInput placeholder="Username" [(ngModel)]="username">
-        </mat-form-field>
-        
-        <mat-form-field>
-            <input matInput placeholder="New Highscore" [(ngModel)]="newHighscore">
-        </mat-form-field>
-    </div>
-</div>
+<div class="landing-content">
+  <h1>Welcome to the Landing Page!</h1>
+
+  <div class="input-container">
+    <mat-form-field class="username-field">
+      <label for="username">User</label>
+      <input matInput placeholder="Username" [(ngModel)]="username" id="username">
+    </mat-form-field>
+
+    <mat-form-field class="highscore-field">
+      <label for="new-highscore">New Highscore</label>
+      <input matInput placeholder="New Highscore" [(ngModel)]="newHighscore" id="new-highscore">
+    </mat-form-field>
+
+    <button mat-button class="post-highscore-button" (click)="postHighscore()">Post New Highscore</button>
+    
+  </div>
+
+  <p *ngIf="successMessage" class="success-message">{{ successMessage }}</p>
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
   
+</div>

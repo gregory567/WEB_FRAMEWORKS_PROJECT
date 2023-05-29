@@ -30,7 +30,7 @@
 
     <p *ngIf="loginSuccessful" class="success-message">Login successful.</p>
     <!-- Display login error message -->
-    <p *ngIf="loginFailed && !loginSuccessful" class="login-error">{{ loginErrorMessage }}</p>
+    <p *ngIf="loginFailed && !loginSuccessful" class="error-message">{{ loginErrorMessage }}</p>
     <p *ngIf="loginFailed && !loginSuccessful" class="error-message">Login failed.</p>
 </form>
 

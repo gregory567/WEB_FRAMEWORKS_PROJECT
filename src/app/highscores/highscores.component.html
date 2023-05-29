@@ -1,10 +1,10 @@
 
-<h1>Highscores</h1>
+<h1 class="highscores-title">Highscores</h1>
 
-<ul *ngIf="highscores">
-  <li *ngFor="let score of highscores">
-    {{ score.username }}: {{ score.score }}
+<ul *ngIf="highscores" class="highscores-list">
+  <li *ngFor="let score of highscores | sortScore" class="highscores-item">
+    <span class="highscores-user">{{ score.user }}</span>: {{ score.score }}
   </li>
 </ul>
 
-<p *ngIf="!highscores">Loading highscores...</p>
+<p *ngIf="!highscores" class="loading-message">Loading highscores...</p>

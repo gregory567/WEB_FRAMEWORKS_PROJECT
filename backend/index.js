@@ -90,11 +90,6 @@ app.get("/", function(req, res){
     res.status(200).json("Backend works!");
 });
 
-// request users array (not secure way of communication)
-app.get("/users", function(req, res){
-    res.status(200).json(users);
-});
-
 // Return users array only with valid auth token
 app.get("/users", authenticate, function (req, res) {
     try {
@@ -224,7 +219,7 @@ app.post("/signup", function (req, res, next) {
 app.post("/highscores", authenticate, function(req, res) {
     const highscoreData = JSON.stringify(req.body);
     console.log(highscoreData);
-
+  
     const { username, score } = req.body;
   
     // Check if the username or score is missing
@@ -232,12 +227,20 @@ app.post("/highscores", authenticate, function(req, res) {
       return res.status(400).json({ message: "Username and score are required.", code: 400 });
     }
   
-    // Add the new highscore to the highScores array
-    highScores.push({ user: username, score: score });
+    // Find the existing highscore entry for the user
+    const existingHighscoreIndex = highScores.findIndex(entry => entry.user === username);
+  
+    if (existingHighscoreIndex !== -1) {
+      // Update the existing highscore entry with the new score
+      highScores[existingHighscoreIndex].score = score;
+    } else {
+      // Add the new highscore to the highScores array
+      highScores.push({ user: username, score: score });
+    }
   
     res.status(200).json({ message: "Highscore submitted successfully.", code: 200 });
 });
-
+  
 
 app.get("/highscores", authenticate, function (req, res) {
     try {

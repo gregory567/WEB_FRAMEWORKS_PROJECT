@@ -1,0 +1,55 @@
+/* Toolbar styles */
+.toolbar {
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+  }
+  
+  .toolbar-title {
+    flex-grow: 1;
+  }
+  
+  .toolbar-button {
+    margin-left: 8px;
+  }
+  
+  /* Landing content styles */
+  .landing-content {
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  .input-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+  }
+  
+  .username-field,
+  .highscore-field {
+    margin-right: 16px;
+  }
+  
+  .post-highscore-button {
+    background-color: #2196f3;
+    color: white;
+    font-weight: bold;
+    padding: 12px 24px; 
+    font-size: 16px; 
+  }
+  
+  .post-highscore-button:hover {
+    background-color: #1976d2;
+  }
+
+  .success-message {
+    color: green;
+  }
+    
+  .error-message {
+      color: red;
+  }
+  
+  
+  

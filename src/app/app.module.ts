@@ -8,6 +8,7 @@ import { SignupComponent } from './signup/signup.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
+import { SortScorePipe } from './sort-score.pipe';
 
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatBadgeModule} from '@angular/material/badge';
@@ -54,7 +55,8 @@ import { HighscoresComponent } from './highscores/highscores.component';
     LoginComponent,
     SignupComponent,
     LandingPageComponent,
-    HighscoresComponent
+    HighscoresComponent,
+    SortScorePipe
   ],
   imports: [
     BrowserModule,
