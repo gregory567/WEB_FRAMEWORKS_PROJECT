@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { NgForm } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -10,7 +11,7 @@ import { NgForm } from '@angular/forms';
 })
 
 export class LoginComponent {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   httpOptions = {
     headers: new HttpHeaders({ "Content-Type": "application/json"})
@@ -91,6 +92,9 @@ export class LoginComponent {
           this.loginFailed = false;
           this.loginErrorMessage = '';
           console.log(responseData.message);
+
+          // Redirect to landing page upon successful login
+          this.router.navigate(['/landing-page']);
         },
         error: (err) => {
           this.loginSuccessful = false;

@@ -44,13 +44,17 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatTreeModule} from '@angular/material/tree';
+import { LandingPageComponent } from './landing-page/landing-page.component';
+import { HighscoresComponent } from './highscores/highscores.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-    SignupComponent
+    SignupComponent,
+    LandingPageComponent,
+    HighscoresComponent
   ],
   imports: [
     BrowserModule,
