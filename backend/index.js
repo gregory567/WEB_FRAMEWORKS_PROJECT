@@ -11,6 +11,10 @@ const bcrypt = require("bcrypt");
 // save the port that the server operates on
 const port = 3000;
 
+const db = require("./db.js");
+
+db.connect();
+
 // we use the following middlewares in order to be able to use json and urlencoded data
 // To parse the incoming requests with JSON payloads
 // https://stackoverflow.com/questions/66525078/bodyparser-is-deprecated
