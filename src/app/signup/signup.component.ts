@@ -38,8 +38,6 @@ export class SignupComponent {
     this.matchConfirmPassword.bind(this),
   ]);
 
-  address = new FormControl('');
-
   city = new FormControl('', [
     Validators.required
   ]);
