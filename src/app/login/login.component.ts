@@ -35,11 +35,6 @@ export class LoginComponent {
     Validators.maxLength(20),
   ]);
 
-  confirmPassword = new FormControl('', [
-    Validators.required,
-    this.matchConfirmPassword.bind(this),
-  ]);
-
   getEmailErrorMessage() {
     if (this.email.hasError('required')) {
       return 'You must enter a value';
@@ -58,22 +53,6 @@ export class LoginComponent {
       return 'Password cannot exceed 20 characters';
     }
     return '';
-  }
-
-  getConfirmPasswordErrorMessage() {
-    if (this.confirmPassword.hasError('required')) {
-      return 'You must confirm your password';
-    }
-    if (this.confirmPassword.hasError('passwordMismatch')) {
-      return 'Passwords do not match';
-    }
-    return '';
-  }
-
-  matchConfirmPassword(control: FormControl) {
-    const password = this.password.value;
-    const confirmPassword = control.value;
-    return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
   onSubmit(form: NgForm) {

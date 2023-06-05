@@ -12,7 +12,6 @@ const bcrypt = require("bcrypt");
 const port = 3000;
 
 const db = require("./db.js");
-
 db.connect();
 
 // we use the following middlewares in order to be able to use json and urlencoded data

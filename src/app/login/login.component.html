@@ -17,15 +17,6 @@
         <mat-error *ngIf="password.invalid">{{getPasswordErrorMessage()}}</mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="fill" class="example-full-width">
-      <mat-label>Confirm your password</mat-label>
-      <input matInput [type]="hideConfirm ? 'password' : 'text'" name="confirmPassword" [formControl]="confirmPassword">
-      <button mat-icon-button matSuffix (click)="hideConfirm = !hideConfirm" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hideConfirm">
-        <mat-icon>{{hideConfirm ? 'visibility_off' : 'visibility'}}</mat-icon>
-      </button>
-      <mat-error *ngIf="confirmPassword.invalid">{{getConfirmPasswordErrorMessage()}}</mat-error>
-    </mat-form-field>
-
     <button mat-raised-button color="primary" type="submit">Login</button>
 
     <p *ngIf="loginSuccessful" class="success-message">Login successful.</p>
@@ -36,11 +27,8 @@
 
 
 <span>hide: {{ hidePassword }}</span><br>
-<span>hideConfirm: {{ hideConfirm }}</span><br>
 <span>email adress field is empty: {{ email.hasError('required') }}</span><br>
 <span>email is not a valid email adress: {{ email.hasError('email') }}</span><br>
 <span>password field is empty: {{ password.hasError('required') }}</span><br>
 <span>password is not 8 characters long: {{ password.hasError('minlength') }}</span><br>
 <span>password is longer than 20 characters: {{ password.hasError('maxlength') }}</span><br>
-<span>password confirmation field is empty: {{ confirmPassword.hasError('required') }}</span><br>
-<span>password and confirmation do not match: {{ confirmPassword.hasError('passwordMismatch') }}</span><br>
