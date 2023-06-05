@@ -24,12 +24,43 @@ app.use(express.json());
 // inmemory-DB
 // users array with username / password
 let users = [
-    { username: "patrick102@gmail.com", password: "12345678" },
-    { username: "jennifer99@gmail.com", password: "abcdefgh" },
-    { username: "michael34@gmail.com", password: "qwertyui" },
-    { username: "emily85@gmail.com", password: "p@ssw0rd" },
-    { username: "david76@gmail.com", password: "98765432" }
+  {
+    username: "patrick102@gmail.com",
+    password: "$2b$10$Ls./TBBiVJ12hHFlCE11ZOLFeKdXy1j3hlgvxyvOspXr6d/qLr4h2",
+    city: "New York",
+    street: "123 Main St",
+    postalCode: "10001"
+  },
+  {
+    username: "jennifer99@gmail.com",
+    password: "$2b$10$TLxSJtFOc7D/ESmFyAgNHO2SXjqbT4iF2K3u7fGvNvDnRV7AxlMly",
+    city: "Los Angeles",
+    street: "456 Elm St",
+    postalCode: "90001"
+  },
+  {
+    username: "michael34@gmail.com",
+    password: "$2b$10$qv3SKS9RMZL3soQbev4j7u4hlz4UP1YzAx3m/PMo5WvSydWZt7akC",
+    city: "Chicago",
+    street: "789 Oak St",
+    postalCode: "60601"
+  },
+  {
+    username: "emily85@gmail.com",
+    password: "$2b$10$OZ.2dIzeqV51QbxdUEGDUOjZILnW3pB9zo9j8PTEd5NS4O.8gEPLW",
+    city: "Houston",
+    street: "234 Walnut St",
+    postalCode: "77001"
+  },
+  {
+    username: "david76@gmail.com",
+    password: "$2b$10$hn/fNzjgEEYdTwvuIjQ0vuz6sY/gWnVfTyMQC5ZaS9UB2l6sUMpP2",
+    city: "Miami",
+    street: "567 Pine St",
+    postalCode: "33101"
+  }
 ];
+
 
 // tokens array with auth-tokens
 let tokens = [
@@ -190,33 +221,33 @@ app.post("/logout", authenticate, function(req, res) {
   
 
 app.post("/signup", function (req, res, next) {
+  const signupData = JSON.stringify(req.body);
+  console.log(signupData);
 
-    const signupData = JSON.stringify(req.body);
-    console.log(signupData);
+  const { username, password, city, street, postalCode } = req.body;
 
-    const { username, password } = req.body;
-  
-    if (!username || !password) {
-      return res.status(400).json({ message: "Username and password are required.", code: 400 });
+  if (!username || !password || !city || !street || !postalCode) {
+    return res.status(400).json({ message: "All fields are required.", code: 400 });
+  }
+
+  const existingUser = users.find((user) => user.username === username);
+  if (existingUser) {
+    return res.status(409).json({ message: "Username already exists.", code: 409 });
+  }
+
+  // Hash the password
+  bcrypt.hash(password, 10, function (err, hashedPassword) {
+    if (err) {
+      return res.status(500).json({ message: "Error hashing password.", code: 500 });
     }
-  
-    const existingUser = users.find((user) => user.username === username);
-    if (existingUser) {
-      return res.status(409).json({ message: "Username already exists.", code: 409 });
-    }
-  
-    // Hash the password
-    bcrypt.hash(password, 10, function (err, hashedPassword) {
-      if (err) {
-        return res.status(500).json({ message: "Error hashing password.", code: 500 });
-      }
-  
-      // Add the new user to the users array with the hashed password
-      users.push({ username, password: hashedPassword });
-  
-      res.status(200).json({ message: "User registered successfully.", code: 200 });
-    });
+
+    // Add the new user to the users array with the hashed password and additional fields
+    users.push({ username, password: hashedPassword, city, street, postalCode });
+
+    res.status(200).json({ message: "User registered successfully.", code: 200 });
+  });
 });
+
 
 
 app.post("/highscores", authenticate, function(req, res) {

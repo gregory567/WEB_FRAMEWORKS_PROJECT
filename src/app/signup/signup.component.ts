@@ -121,13 +121,19 @@ export class SignupComponent {
 
       const email = this.email.value;
       const password = this.password.value;
+      const city = this.city.value;
+      const street = this.street.value;
+      const postalCode = this.postalCodeFormControl.value;
 
       console.log('Email:', email);
       console.log('Password:', password);
-  
+
       const signupData = {
         username: email,
         password: password,
+        city: city,
+        street: street,
+        postalCode: postalCode
       };
   
       this.http
