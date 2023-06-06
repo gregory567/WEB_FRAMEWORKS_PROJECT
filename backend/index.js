@@ -160,6 +160,49 @@ app.post("/users", function(req, res) {
     res.status(201).json({ message: "User created successfully.", code: 201 });
 });
 
+app.post("/users", async (req, res) => {
+
+    const signupData = JSON.stringify(req.body);
+    console.log(signupData);
+
+    const { username, password, city, street, postalCode } = req.body;
+
+    try {
+      if (!username || !password || !city || !street || !postalCode) {
+        return res.status(400).json({ message: "All fields are required.", code: 400 });
+      }
+  
+      const existingUser = await User.findOne({ username: username });
+      if (existingUser) {
+        return res.status(409).json({ message: "Username already exists.", code: 409 });
+      }
+  
+      // Hash the password
+      bcrypt.hash(password, 10, async function (err, hashedPassword) {
+        if (err) {
+          return res.status(500).json({ message: "Error hashing password.", code: 500 });
+        }
+  
+        const newUser = new User({
+          username: username,
+          password: hashedPassword,
+          city: city,
+          street: street,
+          postalCode: postalCode
+        });
+  
+        try {
+          await newUser.save();
+          res.status(201).json({ message: "User created successfully.", code: 201 });
+        } catch (error) {
+          res.status(500).json({ message: "Error saving user.", code: 500 });
+        }
+      });
+    } catch (err) {
+      res.status(500).json({ message: "Server error.", code: 500 });
+    }
+});
+
 
 app.post("/login", async function(req, res) {
 
