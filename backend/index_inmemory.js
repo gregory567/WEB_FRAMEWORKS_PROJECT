@@ -11,15 +11,8 @@ const bcrypt = require("bcrypt");
 // save the port that the server operates on
 const port = 3000;
 
-// Import the Mongoose models
-import { User } from './userdata.js';
-import { Token } from './tokendata.js';
-import { HighScore } from './highscoredata.js';
-
 const db = require("./db.js");
 db.connect();
-
-
 
 // we use the following middlewares in order to be able to use json and urlencoded data
 // To parse the incoming requests with JSON payloads
@@ -113,17 +106,17 @@ app.use("*", function(req, res){
 });
 */
 
-// Middleware for authentication
+// Authentication middleware
 function authenticate(req, res, next) {
-  const token = req.headers.authorization ?? "";
-  const authUser = tokens.find((t) => "Bearer " + t.token === token);
-
-  if (authUser) {
+    const token = req.headers.authorization ?? "";
+    const authUser = tokens.find((t) => "Bearer " + t.token === token);
+  
+    if (authUser) {
       req.user = authUser.user;
       next();
-  } else {
+    } else {
       res.status(401).json({ message: "401 Unauthorized", code: 401 });
-  }
+    }
 }
 
 // request to the homepage
@@ -131,58 +124,40 @@ app.get("/", function(req, res){
     res.status(200).json("Backend works!");
 });
 
-// Get all users
-app.get("/users", authenticate, async function(req, res) {
-  try {
-      const users = await User.find();
-      res.status(200).json(users);
-  } catch (error) {
-      console.error("Error retrieving users:", error);
-      res.status(500).json({ message: "Internal server error.", code: 500 });
-  }
+// Return users array only with valid auth token
+app.get("/users", authenticate, function (req, res) {
+    try {
+        if (users.length === 0) {
+          return res.status(404).json({ message: "No users found.", code: 404 });
+        }
+    
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error retrieving users:", error);
+        res.status(500).json({ message: "Internal server error.", code: 500 });
+    }
 });
 
-app.post("/users", async (req, res) => {
 
-    const signupData = JSON.stringify(req.body);
-    console.log(signupData);
-
-    const { username, password, city, street, postalCode } = req.body;
-
-    try {
-      if (!username || !password || !city || !street || !postalCode) {
-        return res.status(400).json({ message: "All fields are required.", code: 400 });
-      }
+app.post("/users", function(req, res) {
+    console.log("Post: ", req.body);
+    const { username, password } = req.body;
   
-      const existingUser = await User.findOne({ username: username });
-      if (existingUser) {
-        return res.status(409).json({ message: "Username already exists.", code: 409 });
-      }
-  
-      // Hash the password
-      bcrypt.hash(password, 10, async function (err, hashedPassword) {
-        if (err) {
-          return res.status(500).json({ message: "Error hashing password.", code: 500 });
-        }
-  
-        const newUser = new User({
-          username: username,
-          password: hashedPassword,
-          city: city,
-          street: street,
-          postalCode: postalCode
-        });
-  
-        try {
-          await newUser.save();
-          res.status(201).json({ message: "User created successfully.", code: 201 });
-        } catch (error) {
-          res.status(500).json({ message: "Error saving user.", code: 500 });
-        }
-      });
-    } catch (err) {
-      res.status(500).json({ message: "Server error.", code: 500 });
+    // Check if the username or password is missing
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required.", code: 400 });
     }
+  
+    // Check if the username is already taken
+    const existingUser = users.find((user) => user.username === username);
+    if (existingUser) {
+      return res.status(409).json({ message: "Username already exists.", code: 409 });
+    }
+  
+    // Add the new user to the users array
+    users.push({ username, password });
+  
+    res.status(201).json({ message: "User created successfully.", code: 201 });
 });
 
 
@@ -197,47 +172,21 @@ app.post("/login", async function(req, res) {
       return res.status(400).json({ message: "Username and password are required.", code: 400 });
     }
   
-    try {
-      // Find the user in the database
-      const user = await User.findOne({ username: username });
+    // Find the user with the given username
+    const user = users.find((user) => user.username === username);
+  
+    // Check if the user exists and the password matches
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: "Invalid username or password.", code: 401 });
+    }
 
-      // Check if the user exists
-      if (!user) {
-          return res.status(401).json({ message: "Invalid username or password.", code: 401 });
-      }
+    // Generate a random auth token of length 32
+    const authToken = generateAuthToken(32);
 
-      // Compare the provided password with the stored hashed password
-      bcrypt.compare(password, user.password, function(err, result) {
-          if (err) {
-              return res.status(500).json({ message: "Error comparing passwords.", code: 500 });
-          }
-
-          // If the passwords match, generate an authentication token
-          if (result) {
-              const authToken = generateAuthToken();
-
-              // Create a new token and store it in the database
-              const newToken = new Token({
-                  user: user.username,
-                  token: authToken
-              });
-
-              newToken.save(function(err) {
-                  if (err) {
-                      return res.status(500).json({ message: "Error saving token.", code: 500 });
-                  }
-
-                  // Return the authentication token
-                  res.status(200).json({ token: authToken });
-              });
-          } else {
-              // Passwords don't match
-              res.status(401).json({ message: "Invalid username or password.", code: 401 });
-          }
-      });
-  } catch (error) {
-      res.status(500).json({ message: "Server error.", code: 500 });
-  }
+    // Add the token to the tokens array
+    tokens.push({ token: authToken, user: username });
+  
+    res.status(200).json({ message: "Login successful.", code: 200, authToken });
 });
 
 
