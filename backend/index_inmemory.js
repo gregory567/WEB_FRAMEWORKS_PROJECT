@@ -130,34 +130,11 @@ app.get("/users", authenticate, function (req, res) {
         if (users.length === 0) {
           return res.status(404).json({ message: "No users found.", code: 404 });
         }
-    
         res.status(200).json(users);
     } catch (error) {
         console.error("Error retrieving users:", error);
         res.status(500).json({ message: "Internal server error.", code: 500 });
     }
-});
-
-
-app.post("/users", function(req, res) {
-    console.log("Post: ", req.body);
-    const { username, password } = req.body;
-  
-    // Check if the username or password is missing
-    if (!username || !password) {
-      return res.status(400).json({ message: "Username and password are required.", code: 400 });
-    }
-  
-    // Check if the username is already taken
-    const existingUser = users.find((user) => user.username === username);
-    if (existingUser) {
-      return res.status(409).json({ message: "Username already exists.", code: 409 });
-    }
-  
-    // Add the new user to the users array
-    users.push({ username, password });
-  
-    res.status(201).json({ message: "User created successfully.", code: 201 });
 });
 
 
@@ -187,20 +164,6 @@ app.post("/login", async function(req, res) {
     tokens.push({ token: authToken, user: username });
   
     res.status(200).json({ message: "Login successful.", code: 200, authToken });
-});
-
-
-app.delete("/tokens", authenticate, function(req, res) {
-    const token = req.headers.authorization ?? "";
-    const authUserIndex = tokens.findIndex((t) => "Bearer " + t.token === token);
-  
-    if (authUserIndex !== -1) {
-      // Remove the authentication token from the tokens array
-      tokens.splice(authUserIndex, 1);
-      res.status(200).json({ message: "Logged out successfully.", code: 200 });
-    } else {
-      res.status(404).json({ message: "Token not found.", code: 404 });
-    }
 });
 
 app.post("/logout", authenticate, function(req, res) {

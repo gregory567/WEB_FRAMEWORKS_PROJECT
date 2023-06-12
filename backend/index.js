@@ -28,65 +28,6 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
 
-// inmemory-DB
-// users array with username / password
-let users = [
-  {
-    username: "patrick102@gmail.com",
-    password: "$2b$10$Ls./TBBiVJ12hHFlCE11ZOLFeKdXy1j3hlgvxyvOspXr6d/qLr4h2",
-    city: "New York",
-    street: "123 Main St",
-    postalCode: "10001"
-  },
-  {
-    username: "jennifer99@gmail.com",
-    password: "$2b$10$TLxSJtFOc7D/ESmFyAgNHO2SXjqbT4iF2K3u7fGvNvDnRV7AxlMly",
-    city: "Los Angeles",
-    street: "456 Elm St",
-    postalCode: "90001"
-  },
-  {
-    username: "michael34@gmail.com",
-    password: "$2b$10$qv3SKS9RMZL3soQbev4j7u4hlz4UP1YzAx3m/PMo5WvSydWZt7akC",
-    city: "Chicago",
-    street: "789 Oak St",
-    postalCode: "60601"
-  },
-  {
-    username: "emily85@gmail.com",
-    password: "$2b$10$OZ.2dIzeqV51QbxdUEGDUOjZILnW3pB9zo9j8PTEd5NS4O.8gEPLW",
-    city: "Houston",
-    street: "234 Walnut St",
-    postalCode: "77001"
-  },
-  {
-    username: "david76@gmail.com",
-    password: "$2b$10$hn/fNzjgEEYdTwvuIjQ0vuz6sY/gWnVfTyMQC5ZaS9UB2l6sUMpP2",
-    city: "Miami",
-    street: "567 Pine St",
-    postalCode: "33101"
-  }
-];
-
-
-// tokens array with auth-tokens
-let tokens = [
-    { token: "admintoken", user: "admin" },
-    { token: "token1", user: "patrick102@gmail.com" },
-    { token: "token2", user: "jennifer99@gmail.com" },
-    { token: "token3", user: "michael34@gmail.com" },
-    { token: "token4", user: "emily85@gmail.com" },
-    { token: "token5", user: "david76@gmail.com" }
-];
-
-// array with highscores
-let highScores = [
-    { user: "patrick102@gmail.com", score: 150 },
-    { user: "jennifer99@gmail.com", score: 200 },
-    { user: "michael34@gmail.com", score: 100 },
-    { user: "emily85@gmail.com", score: 300 },
-    { user: "david76@gmail.com", score: 250 }
-];
 
 // allow request from Angular app (and others) to the resources of the backend server
 app.use(cors());
@@ -114,15 +55,21 @@ app.use("*", function(req, res){
 */
 
 // Middleware for authentication
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   const token = req.headers.authorization ?? "";
-  const authUser = tokens.find((t) => "Bearer " + t.token === token);
 
-  if (authUser) {
-      req.user = authUser.user;
+  try {
+    const existingToken = await Token.findOne({ token: token });
+
+    if (existingToken) {
+      req.user = existingToken.user;
       next();
-  } else {
+    } else {
       res.status(401).json({ message: "401 Unauthorized", code: 401 });
+    }
+  } catch (error) {
+    console.error("Error authenticating user:", error);
+    res.status(500).json({ message: "Internal server error.", code: 500 });
   }
 }
 
@@ -132,17 +79,20 @@ app.get("/", function(req, res){
 });
 
 // Get all users
-app.get("/users", authenticate, async function(req, res) {
+app.get("/users", authenticate, async function (req, res) {
   try {
-      const users = await User.find();
-      res.status(200).json(users);
+    const users = await User.find();
+    if (users.length === 0) {
+      return res.status(404).json({ message: "No users found.", code: 404 });
+    }
+    res.status(200).json({ message: "Users retrieved successfully.", users: users });
   } catch (error) {
-      console.error("Error retrieving users:", error);
-      res.status(500).json({ message: "Internal server error.", code: 500 });
+    console.error("Error retrieving users:", error);
+    res.status(500).json({ message: "Internal server error.", code: 500 });
   }
 });
 
-app.post("/users", async (req, res) => {
+app.post("/signup", async (req, res) => {
 
     const signupData = JSON.stringify(req.body);
     console.log(signupData);
@@ -186,158 +136,117 @@ app.post("/users", async (req, res) => {
 });
 
 
-app.post("/login", async function(req, res) {
+app.post("/login", async function (req, res) {
+  const loginData = JSON.stringify(req.body);
+  console.log(loginData);
+  const { username, password } = req.body;
 
-    const loginData = JSON.stringify(req.body);
-    console.log(loginData);
-    const { username, password } = req.body;
-  
-    // Check if the username or password is missing
-    if (!username || !password) {
-      return res.status(400).json({ message: "Username and password are required.", code: 400 });
+  // Check if the username or password is missing
+  if (!username || !password) {
+    return res.status(400).json({ message: "Username and password are required.", code: 400 });
+  }
+
+  try {
+    // Find the user in the database
+    const user = await User.findOne({ username: username });
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(401).json({ message: "Invalid username.", code: 401 });
     }
-  
-    try {
-      // Find the user in the database
-      const user = await User.findOne({ username: username });
 
-      // Check if the user exists
-      if (!user) {
-          return res.status(401).json({ message: "Invalid username or password.", code: 401 });
+    // Compare the provided password with the stored hashed password
+    bcrypt.compare(password, user.password, function (err, result) {
+      if (err) {
+        return res.status(500).json({ message: "Error comparing passwords.", code: 500 });
       }
 
-      // Compare the provided password with the stored hashed password
-      bcrypt.compare(password, user.password, function(err, result) {
+      // If the passwords match, generate an authentication token
+      if (result) {
+        const authToken = generateAuthToken(32);
+
+        // Create a new token and store it in the database
+        const newToken = new Token({
+          user: user.username,
+          token: authToken,
+        });
+
+        newToken.save(function (err) {
           if (err) {
-              return res.status(500).json({ message: "Error comparing passwords.", code: 500 });
+            return res.status(500).json({ message: "Error saving token.", code: 500 });
           }
 
-          // If the passwords match, generate an authentication token
-          if (result) {
-              const authToken = generateAuthToken();
-
-              // Create a new token and store it in the database
-              const newToken = new Token({
-                  user: user.username,
-                  token: authToken
-              });
-
-              newToken.save(function(err) {
-                  if (err) {
-                      return res.status(500).json({ message: "Error saving token.", code: 500 });
-                  }
-
-                  // Return the authentication token
-                  res.status(200).json({ token: authToken });
-              });
-          } else {
-              // Passwords don't match
-              res.status(401).json({ message: "Invalid username or password.", code: 401 });
-          }
-      });
-  } catch (error) {
-      res.status(500).json({ message: "Server error.", code: 500 });
-  }
-});
-
-
-app.delete("/tokens", authenticate, function(req, res) {
-    const token = req.headers.authorization ?? "";
-    const authUserIndex = tokens.findIndex((t) => "Bearer " + t.token === token);
-  
-    if (authUserIndex !== -1) {
-      // Remove the authentication token from the tokens array
-      tokens.splice(authUserIndex, 1);
-      res.status(200).json({ message: "Logged out successfully.", code: 200 });
-    } else {
-      res.status(404).json({ message: "Token not found.", code: 404 });
-    }
-});
-
-app.post("/logout", authenticate, function(req, res) {
-    const token = req.headers.authorization ?? "";
-    const authUserIndex = tokens.findIndex((t) => "Bearer " + t.token === token);
-  
-    if (authUserIndex !== -1) {
-      // Remove the authentication token from the tokens array
-      tokens.splice(authUserIndex, 1);
-      
-      console.log("Token destroyed:", token);
-      
-      res.status(200).json({ message: "Logged out successfully.", code: 200 });
-    } else {
-      res.status(404).json({ message: "Token not found.", code: 404 });
-    }
-});
-  
-
-app.post("/signup", function (req, res, next) {
-  const signupData = JSON.stringify(req.body);
-  console.log(signupData);
-
-  const { username, password, city, street, postalCode } = req.body;
-
-  if (!username || !password || !city || !street || !postalCode) {
-    return res.status(400).json({ message: "All fields are required.", code: 400 });
-  }
-
-  const existingUser = users.find((user) => user.username === username);
-  if (existingUser) {
-    return res.status(409).json({ message: "Username already exists.", code: 409 });
-  }
-
-  // Hash the password
-  bcrypt.hash(password, 10, function (err, hashedPassword) {
-    if (err) {
-      return res.status(500).json({ message: "Error hashing password.", code: 500 });
-    }
-
-    // Add the new user to the users array with the hashed password and additional fields
-    users.push({ username, password: hashedPassword, city, street, postalCode });
-
-    res.status(200).json({ message: "User registered successfully.", code: 200 });
-  });
-});
-
-
-
-app.post("/highscores", authenticate, function(req, res) {
-    const highscoreData = JSON.stringify(req.body);
-    console.log(highscoreData);
-  
-    const { username, score } = req.body;
-  
-    // Check if the username or score is missing
-    if (!username || !score) {
-      return res.status(400).json({ message: "Username and score are required.", code: 400 });
-    }
-  
-    // Find the existing highscore entry for the user
-    const existingHighscoreIndex = highScores.findIndex(entry => entry.user === username);
-  
-    if (existingHighscoreIndex !== -1) {
-      // Update the existing highscore entry with the new score
-      highScores[existingHighscoreIndex].score = score;
-    } else {
-      // Add the new highscore to the highScores array
-      highScores.push({ user: username, score: score });
-    }
-  
-    res.status(200).json({ message: "Highscore submitted successfully.", code: 200 });
-});
-  
-
-app.get("/highscores", authenticate, function (req, res) {
-    try {
-      if (highScores.length === 0) {
-        return res.status(404).json({ message: "No highscores found.", code: 404 });
+          // Return the authentication token along with a success message
+          res.status(200).json({ message: "Login successful.", token: authToken });
+        });
+      } else {
+        // Passwords don't match
+        res.status(401).json({ message: "Password does not match.", code: 401 });
       }
-  
-      res.status(200).json(highScores);
-    } catch (error) {
-      console.error("Error retrieving highscores:", error);
-      res.status(500).json({ message: "Internal server error.", code: 500 });
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error.", code: 500 });
+  }
+});
+
+
+// User logout
+app.post("/logout", authenticate, async function (req, res) {
+  try {
+    const token = req.headers.authorization;
+
+    // Check if the token exists
+    const existingToken = await Token.findOne({ token: token });
+    if (!existingToken) {
+      return res.status(404).json({ message: "Token not found.", code: 404 });
     }
+
+    // Delete the token from the database
+    await Token.deleteOne({ token: token });
+
+    res.status(200).json({ message: "User logged out successfully.", code: 200 });
+  } catch (error) {
+    console.error("Error logging out user:", error);
+    res.status(500).json({ message: "Internal server error.", code: 500 });
+  }
+});
+
+
+// Add a new high score
+app.post("/highscores", authenticate, async function (req, res) {
+  try {
+    const { user, score } = req.body;
+
+    if (!user || !score) {
+      return res.status(400).json({ message: "User and score are required.", code: 400 });
+    }
+
+    const newHighScore = new HighScore({
+      user: user,
+      score: score,
+    });
+
+    await newHighScore.save();
+    res.status(201).json({ message: "Highscore submitted successfully.", code: 201 });
+  } catch (error) {
+    console.error("Error adding high score:", error);
+    res.status(500).json({ message: "Internal server error.", code: 500 });
+  }
+});
+
+
+// Get all high scores
+app.get("/highscores", authenticate, async function (req, res) {
+  try {
+    const highScores = await HighScore.find();
+    if (highScores.length === 0) {
+      return res.status(404).json({ message: "No high scores found.", code: 404 });
+    }
+    res.status(200).json(highScores);
+  } catch (error) {
+    console.error("Error retrieving high scores:", error);
+    res.status(500).json({ message: "Internal server error.", code: 500 });
+  }
 });
 
   
